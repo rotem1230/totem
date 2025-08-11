@@ -1,0 +1,32 @@
+/// <reference types="jest" />
+import '@testing-library/jest-dom';
+import { setupMocks } from './__tests__/setup/mocks';
+
+// Setup mocks before all tests
+setupMocks();
+
+// Mock IntersectionObserver which is not available in jsdom
+if (typeof window !== 'undefined') {
+  window.IntersectionObserver = class MockIntersectionObserver implements IntersectionObserver {
+    readonly root: Element | null = null;
+    readonly rootMargin: string = '0px';
+    readonly thresholds: ReadonlyArray<number> = [0];
+
+    constructor() {}
+    observe(): void {}
+    unobserve(): void {}
+    disconnect(): void {}
+    takeRecords(): IntersectionObserverEntry[] {
+      return [];
+    }
+  };
+}
+
+// Suppress console errors/warnings in test output
+beforeAll(() => {
+  console.error = jest.fn();
+  console.warn = jest.fn();
+});
+
+// Setup environment variables for testing
+process.env.TEST_DATABASE_URL = 'postgresql://postgres:postgres@localhost:5432/kosuke_test';
